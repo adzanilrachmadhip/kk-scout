@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Page;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+class PageController extends Controller
+{
+    //
+    public function index()
+    {
+        $about = Page::findOrFail(1);
+        return view('admin.page.index', compact('about'));
+    }
+    public function update(Request $request, $id)
+    {
+        $about = Page::findOrFail(1);
+
+        $request->validate([
+            'about' => 'required|string',
+            'visi' => 'nullable|string',
+            'misi' => 'nullable|string',
+        ]);
+
+        $about->update([
+            'about' => $request->about,
+            'visi' => $request->visi,
+            'misi' => $request->misi,
+        ]);
+        return redirect()->route('page.index')->with('success', 'About page updated successfully!');
+    }
+}
