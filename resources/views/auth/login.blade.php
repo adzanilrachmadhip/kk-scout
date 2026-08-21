@@ -59,8 +59,8 @@
                             <div class="card border-grey border-lighten-3 m-0">
                                 <div class="card-header border-0">
                                     <div class="card-title text-center">
-                                        <div class="p-1"><img src="{{ asset('assets/img/img/telu-interest.png') }}"
-                                                alt="branding logo" width="100%" height="100%">
+                                        <div class="p-1">
+                                            <h1>KK SCOUT</h1>
                                         </div>
                                     </div>
                                     <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
