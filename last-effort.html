@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Last Effort for SCOUT</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  #bubbles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #6b8fd4;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 800;
+    color: #1a2b4c;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  p.subtitle {
+    font-size: clamp(15px, 2vw, 18px);
+    color: #5b6b8c;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 36px;
+    background: #2f6fed;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(47, 111, 237, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(47, 111, 237, 0.45);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  .btn:hover svg {
+    transform: translateX(3px);
+  }
+
+  footer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    font-size: 12px;
+    color: #a3aec2;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bubbles"></canvas>
+
+<div class="content">
+  <div class="eyebrow">KK SCOUT</div>
+  <h1>Last Effort for SCOUT</h1>
+  <p class="subtitle">Terima kasih untuk semua perjalanan bersama, Mas Philip. Ini persembahan terakhir kami.</p>
+  <a class="btn" href="https://github.com/adzanilrachmadhip/kk-scout" target="_blank" rel="noopener">
+    Klik Disini
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
+    </svg>
+  </a>
+</div>
+
+<footer>with gratitude, from the team</footer>
+
+<script>
+(function () {
+  const canvas = document.getElementById('bubbles');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = [
+    'rgba(47, 111, 237, 0.35)',
+    'rgba(90, 156, 248, 0.30)',
+    'rgba(130, 180, 255, 0.28)',
+    'rgba(30, 80, 200, 0.25)'
+  ];
+
+  const BUBBLE_COUNT = 16;
+  const bubbles = [];
+
+  function randRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  for (let i = 0; i < BUBBLE_COUNT; i++) {
+    const r = randRange(30, 90);
+    bubbles.push({
+      x: randRange(r, width - r),
+      y: randRange(r, height - r),
+      r: r,
+      vx: randRange(-0.6, 0.6) || 0.3,
+      vy: randRange(-0.6, 0.6) || 0.3,
+      color: COLORS[i % COLORS.length]
+    });
+  }
+
+  function resolveWallCollision(b) {
+    if (b.x - b.r < 0) { b.x = b.r; b.vx *= -1; }
+    if (b.x + b.r > width) { b.x = width - b.r; b.vx *= -1; }
+    if (b.y - b.r < 0) { b.y = b.r; b.vy *= -1; }
+    if (b.y + b.r > height) { b.y = height - b.r; b.vy *= -1; }
+  }
+
+  function resolveBubbleCollision(a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const minDist = a.r + b.r;
+
+    if (dist < minDist && dist > 0) {
+      const overlap = (minDist - dist) / 2;
+      const nx = dx / dist;
+      const ny = dy / dist;
+
+      a.x -= nx * overlap;
+      a.y -= ny * overlap;
+      b.x += nx * overlap;
+      b.y += ny * overlap;
+
+      const avx = a.vx, avy = a.vy;
+      const bvx = b.vx, bvy = b.vy;
+
+      const aDot = avx * nx + avy * ny;
+      const bDot = bvx * nx + bvy * ny;
+
+      a.vx += (bDot - aDot) * nx;
+      a.vy += (bDot - aDot) * ny;
+      b.vx += (aDot - bDot) * nx;
+      b.vy += (aDot - bDot) * ny;
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.filter = 'blur(14px)';
+    for (const b of bubbles) {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = b.color;
+      ctx.fill();
+    }
+    ctx.filter = 'none';
+  }
+
+  function update() {
+    for (const b of bubbles) {
+      b.x += b.vx;
+      b.y += b.vy;
+      resolveWallCollision(b);
+    }
+    for (let i = 0; i < bubbles.length; i++) {
+      for (let j = i + 1; j < bubbles.length; j++) {
+        resolveBubbleCollision(bubbles[i], bubbles[j]);
+      }
+    }
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+})();
+</script>
+
+</body>
+</html>
