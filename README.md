@@ -10,4 +10,6 @@ Sukses selalu untuk KK SCOUT dan semua yang terlibat di dalamnya. Sampai jumpa d
 
 Dengan penuh terima kasih,
 Dari Kami
-Sistem Informasi
+
+Claude...maksud kami
+Sistem Informasi :D
